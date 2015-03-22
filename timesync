@@ -1,0 +1,17 @@
+#!/bin/sh 
+#authored by Hristo Mohamed: hristo.mohamed@gmail.com
+
+echo_time() {
+        echo `date +'%b %e %r '` "$@"   
+}
+
+while true; do
+    hwdate=$(hwclock | awk '{$8=$9="";print $0}')
+    difference=$( echo $(( $(date -d "$hwdate" +%s) - $(date +%s) )) | sed 's/-//g' )
+    if [ $difference -gt "15" ]; then
+        `hwclock -s`
+        echo_time "clocked synced, difference was $difference seconds" >> /var/log/messages
+        echo_time "clocked synced, difference was $difference seconds" >> /var/log/clock_syncs
+    fi
+    sleep 7
+done

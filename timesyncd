@@ -1,0 +1,66 @@
+#!/bin/bash
+#Authored by Hristo Mohamed - hristo.mohamed@gmail.com
+#   Start/stop the timesync workaround process - Hristo
+#       /etc/rc.d/init.d/
+#
+# chkconfig: 2345 13 87
+#
+#
+#
+
+# Source function library.
+. /etc/init.d/functions
+PATH=/usr/bin:/sbin:/bin:/usr/sbin
+export PATH
+
+RETVAL=0
+prog="timesyncd"
+executable="./usr/sbin/timesync"
+
+
+start() {
+    echo $*
+    echo -n "Starting $prog: "
+    daemon nohup $executable &> /dev/null &
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && touch /var/lock/subsys/timesyncd
+    return $RETVAL
+}
+
+stop() {
+    echo -n $"Stopping $prog: "
+    killproc timesyncd
+    echo
+    RETVAL=$?
+    rm -f /var/lock/subsys/timesyncd
+    return $RETVAL
+}
+
+case "$1" in
+    start)
+        start $*
+        ;;
+    stop)
+        stop
+        ;;
+    status)
+        status timesyncd
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    condrestart)
+        if test "x`pidof timesync`" != x; then
+        stop
+        start
+        fi
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|restart|condrestart|status}"
+        exit 1
+esac
+
+exit $RETVAL
+
