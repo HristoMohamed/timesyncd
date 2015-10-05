@@ -1,6 +1,6 @@
 # timesyncd
 
-
+This daemon is maent to be used on SLC6/CentOS6/Rhel7 systems.
 A simple deamon running to ensure there is no difference in the hwclock and the
 software clock.
 RHEV 3.4 suffers the issue that paused/migrated VMs come with incorrect clock,
