@@ -1,5 +1,4 @@
 #!/bin/bash
-#Authored by Hristo Mohamed - hristo.mohamed@gmail.com
 #   Start/stop the timesync workaround process - Hristo
 #       /etc/rc.d/init.d/
 #
@@ -16,15 +15,14 @@ export PATH
 RETVAL=0
 prog="timesyncd"
 executable="./usr/sbin/timesync"
-
+own_pid=$$
 
 start() {
-    echo $*
     echo -n "Starting $prog: "
     daemon nohup $executable &> /dev/null &
     RETVAL=$?
+    [ $RETVAL -eq 0 ] && touch /var/lock/subsys/timesyncd && success
     echo
-    [ $RETVAL -eq 0 ] && touch /var/lock/subsys/timesyncd
     return $RETVAL
 }
 
@@ -37,15 +35,27 @@ stop() {
     return $RETVAL
 }
 
+check_running(){
+    pid=`pidof -o $own_pid -x $prog`
+    if [ $? -eq 0 ]; then
+        echo "timesyncd is already running with pid: $pid"
+	failure
+	echo
+        exit 1
+    fi
+}
+
 case "$1" in
     start)
-        start $*
+        check_running
+        start
         ;;
     stop)
         stop
         ;;
     status)
         status timesyncd
+	echo $?
         ;;
     restart)
         stop
